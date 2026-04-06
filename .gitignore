@@ -35,3 +35,10 @@ out/
 
 ### VS Code ###
 .vscode/
+
+### AI FILES (추가)
+PROJECT_GUIDE.md
+AGENTS.md
+
+### ENV (추천)
+.env
