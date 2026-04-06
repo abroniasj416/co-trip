@@ -42,6 +42,8 @@ public class SecurityConfig {
                         // Preflight OPTIONS 요청은 인증 없이 허용 (CORS 사전 확인)
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/auth/signup", "/api/auth/login").permitAll()
+                        // WebSocket HTTP 업그레이드 요청은 허용 (STOMP 레벨에서 JWT 검증)
+                        .requestMatchers("/ws/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(

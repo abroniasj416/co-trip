@@ -1,0 +1,207 @@
+.panel {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.empty {
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.35);
+  text-align: center;
+  padding: 16px 0;
+  line-height: 1.6;
+}
+
+.group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.groupTitle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.5);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 2px;
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+/* 장소 카드 */
+.card {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  padding: 10px 12px;
+  cursor: pointer;
+  transition: background 0.15s ease;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.card:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.cardSelected {
+  border-color: #ef4444;
+  background: rgba(239, 68, 68, 0.08);
+}
+
+.cardHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.placeName {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.9);
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.createdBy {
+  font-size: 0.72rem;
+  color: rgba(255, 255, 255, 0.35);
+}
+
+.statusBadge {
+  flex-shrink: 0;
+  padding: 2px 8px;
+  border-radius: 20px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  border: none;
+  transition: all 0.15s ease;
+}
+
+.confirmed {
+  background: rgba(59, 130, 246, 0.25);
+  color: #93c5fd;
+}
+
+.confirmed:hover {
+  background: rgba(59, 130, 246, 0.4);
+}
+
+.candidate {
+  background: rgba(245, 158, 11, 0.2);
+  color: #fcd34d;
+}
+
+.candidate:hover {
+  background: rgba(245, 158, 11, 0.35);
+}
+
+/* 메모 */
+.memoRow {
+  cursor: text;
+  min-height: 22px;
+}
+
+.memoText {
+  font-size: 0.78rem;
+  color: rgba(255, 255, 255, 0.55);
+  line-height: 1.5;
+  white-space: pre-wrap;
+}
+
+.memoPlaceholder {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.2);
+}
+
+.memoEdit {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.memoInput {
+  width: 100%;
+  padding: 6px 8px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 6px;
+  color: #ffffff;
+  font-size: 0.78rem;
+  font-family: inherit;
+  resize: none;
+  outline: none;
+}
+
+.memoInput:focus {
+  border-color: #38bdf8;
+}
+
+.memoActions {
+  display: flex;
+  gap: 6px;
+}
+
+.saveMemo, .cancelMemo {
+  padding: 3px 10px;
+  border-radius: 5px;
+  font-size: 0.74rem;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.saveMemo {
+  background: #3b82f6;
+  color: white;
+  border: none;
+}
+
+.saveMemo:hover {
+  background: #2563eb;
+}
+
+.cancelMemo {
+  background: transparent;
+  color: rgba(255, 255, 255, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.cancelMemo:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+/* 삭제 */
+.deleteButton {
+  align-self: flex-end;
+  padding: 2px 8px;
+  border-radius: 5px;
+  border: 1px solid rgba(239, 68, 68, 0.25);
+  background: transparent;
+  color: rgba(239, 68, 68, 0.6);
+  font-size: 0.72rem;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.deleteButton:hover {
+  background: rgba(239, 68, 68, 0.12);
+  color: #f87171;
+  border-color: rgba(239, 68, 68, 0.5);
+}

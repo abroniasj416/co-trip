@@ -115,3 +115,59 @@
   transform: translateY(-1px);
   box-shadow: 0 6px 20px rgba(59, 130, 246, 0.5);
 }
+
+/* 플랜 목록 레이아웃 */
+.plansLayout {
+  width: 100%;
+  max-width: 900px;
+}
+
+.plansHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+}
+
+.plansTitle {
+  font-size: 1.4rem;
+  font-weight: 700;
+}
+
+.planGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 16px;
+}
+
+.planCard {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 14px;
+  cursor: pointer;
+  transition: transform 0.2s ease, background 0.2s ease;
+}
+
+.planCard:hover {
+  transform: translateY(-3px);
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.cardIcon {
+  font-size: 1.5rem;
+}
+
+.cardTitle {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.cardDate {
+  font-size: 0.78rem;
+  color: rgba(255, 255, 255, 0.4);
+}
