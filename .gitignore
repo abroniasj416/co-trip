@@ -42,3 +42,9 @@ AGENTS.md
 
 ### ENV (추천)
 .env
+
+### Frontend ###
+frontend/node_modules/
+frontend/dist/
+frontend/.env
+frontend/.env.local

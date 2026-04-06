@@ -1,0 +1,55 @@
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.button:active {
+  transform: scale(0.97);
+}
+
+/* Variants */
+.primary {
+  background: linear-gradient(135deg, #3b82f6, #0ea5e9);
+  color: #ffffff;
+  box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
+}
+
+.primary:hover {
+  background: linear-gradient(135deg, #2563eb, #0284c7);
+  box-shadow: 0 6px 20px rgba(59, 130, 246, 0.5);
+  transform: translateY(-1px);
+}
+
+.outline {
+  background: transparent;
+  color: #ffffff;
+  border: 2px solid rgba(255, 255, 255, 0.7);
+}
+
+.outline:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: #ffffff;
+  transform: translateY(-1px);
+}
+
+/* Sizes */
+.md {
+  padding: 10px 24px;
+  font-size: 0.95rem;
+}
+
+.lg {
+  padding: 14px 36px;
+  font-size: 1.05rem;
+}
+
+/* Full width */
+.fullWidth {
+  width: 100%;
+}
