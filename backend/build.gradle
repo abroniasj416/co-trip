@@ -38,6 +38,23 @@ dependencies {
 	testAnnotationProcessor 'org.projectlombok:lombok'
 }
 
+tasks.named('bootRun') {
+	doFirst {
+		def envFile = file('.env')
+		if (envFile.exists()) {
+			envFile.readLines().each { line ->
+				line = line.trim()
+				if (line && !line.startsWith('#')) {
+					def parts = line.split('=', 2)
+					if (parts.length == 2) {
+						environment parts[0].trim(), parts[1].trim()
+					}
+				}
+			}
+		}
+	}
+}
+
 tasks.named('test') {
 	useJUnitPlatform()
 }

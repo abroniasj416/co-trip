@@ -8,9 +8,10 @@ interface PlacePanelProps {
   onStatusChange: (placeId: number, status: PlaceStatus) => void;
   onMemoChange: (placeId: number, memo: string) => void;
   onDelete: (placeId: number) => void;
+  onReorder: (placeId: number, direction: 'up' | 'down') => void;
 }
 
-function PlacePanel({ onStatusChange, onMemoChange, onDelete }: PlacePanelProps) {
+function PlacePanel({ onStatusChange, onMemoChange, onDelete, onReorder }: PlacePanelProps) {
   const { places, selectedPlaceId, selectPlace } = usePlaces();
   const [editingMemoId, setEditingMemoId] = useState<number | null>(null);
   const [memoText, setMemoText] = useState('');
@@ -41,10 +42,11 @@ function PlacePanel({ onStatusChange, onMemoChange, onDelete }: PlacePanelProps)
             <span className={styles.dot} style={{ background: '#3b82f6' }} />
             확정 장소 ({confirmed.length})
           </h4>
-          {confirmed.map((place) => (
+          {confirmed.map((place, index) => (
             <PlaceCard
               key={place.id}
               place={place}
+              orderNumber={index + 1}
               isSelected={place.id === selectedPlaceId}
               isEditingMemo={editingMemoId === place.id}
               memoText={memoText}
@@ -55,6 +57,10 @@ function PlacePanel({ onStatusChange, onMemoChange, onDelete }: PlacePanelProps)
               onSaveMemo={() => saveMemo(place.id)}
               onCancelMemo={() => setEditingMemoId(null)}
               onDelete={onDelete}
+              canMoveUp={index > 0}
+              canMoveDown={index < confirmed.length - 1}
+              onMoveUp={() => onReorder(place.id, 'up')}
+              onMoveDown={() => onReorder(place.id, 'down')}
             />
           ))}
         </div>
@@ -70,6 +76,7 @@ function PlacePanel({ onStatusChange, onMemoChange, onDelete }: PlacePanelProps)
             <PlaceCard
               key={place.id}
               place={place}
+              orderNumber={null}
               isSelected={place.id === selectedPlaceId}
               isEditingMemo={editingMemoId === place.id}
               memoText={memoText}
@@ -80,6 +87,10 @@ function PlacePanel({ onStatusChange, onMemoChange, onDelete }: PlacePanelProps)
               onSaveMemo={() => saveMemo(place.id)}
               onCancelMemo={() => setEditingMemoId(null)}
               onDelete={onDelete}
+              canMoveUp={false}
+              canMoveDown={false}
+              onMoveUp={() => {}}
+              onMoveDown={() => {}}
             />
           ))}
         </div>
@@ -90,6 +101,7 @@ function PlacePanel({ onStatusChange, onMemoChange, onDelete }: PlacePanelProps)
 
 interface PlaceCardProps {
   place: Place;
+  orderNumber: number | null;
   isSelected: boolean;
   isEditingMemo: boolean;
   memoText: string;
@@ -100,19 +112,29 @@ interface PlaceCardProps {
   onSaveMemo: () => void;
   onCancelMemo: () => void;
   onDelete: (placeId: number) => void;
+  canMoveUp: boolean;
+  canMoveDown: boolean;
+  onMoveUp: () => void;
+  onMoveDown: () => void;
 }
 
 function PlaceCard({
-  place, isSelected, isEditingMemo, memoText,
+  place, orderNumber, isSelected, isEditingMemo, memoText,
   onSelect, onStatusChange, onStartEditMemo,
   onMemoTextChange, onSaveMemo, onCancelMemo, onDelete,
+  canMoveUp, canMoveDown, onMoveUp, onMoveDown,
 }: PlaceCardProps) {
   const isConfirmed = place.status === 'CONFIRMED';
 
   return (
     <div className={`${styles.card} ${isSelected ? styles.cardSelected : ''}`}>
       <div className={styles.cardHeader} onClick={onSelect}>
-        <span className={styles.placeName}>{place.name}</span>
+        <div className={styles.nameRow}>
+          {orderNumber != null && (
+            <span className={styles.orderBadge}>{orderNumber}</span>
+          )}
+          <span className={styles.placeName}>{place.name}</span>
+        </div>
         <button
           className={`${styles.statusBadge} ${isConfirmed ? styles.confirmed : styles.candidate}`}
           onClick={(e) => {
@@ -150,12 +172,30 @@ function PlaceCard({
         </div>
       )}
 
-      <button
-        className={styles.deleteButton}
-        onClick={(e) => { e.stopPropagation(); onDelete(place.id); }}
-      >
-        삭제
-      </button>
+      <div className={styles.cardFooter}>
+        {isConfirmed && (
+          <div className={styles.orderButtons}>
+            <button
+              className={styles.arrowButton}
+              disabled={!canMoveUp}
+              onClick={(e) => { e.stopPropagation(); onMoveUp(); }}
+              title="위로"
+            >▲</button>
+            <button
+              className={styles.arrowButton}
+              disabled={!canMoveDown}
+              onClick={(e) => { e.stopPropagation(); onMoveDown(); }}
+              title="아래로"
+            >▼</button>
+          </div>
+        )}
+        <button
+          className={styles.deleteButton}
+          onClick={(e) => { e.stopPropagation(); onDelete(place.id); }}
+        >
+          삭제
+        </button>
+      </div>
     </div>
   );
 }

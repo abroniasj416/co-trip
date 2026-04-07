@@ -1,5 +1,6 @@
-import { FormEvent, useState } from 'react';
+import { FormEvent, useEffect, useState } from 'react';
 import { LatLng } from '../../hooks/useNcpMap';
+import { reverseGeocode } from '../../api/geocoding';
 import styles from './AddPlaceModal.module.css';
 
 interface AddPlaceModalProps {
@@ -11,6 +12,15 @@ interface AddPlaceModalProps {
 function AddPlaceModal({ latLng, onConfirm, onCancel }: AddPlaceModalProps) {
   const [name, setName] = useState('');
   const [error, setError] = useState('');
+  const [loadingAddress, setLoadingAddress] = useState(true);
+
+  useEffect(() => {
+    setLoadingAddress(true);
+    reverseGeocode(latLng.lat, latLng.lng).then((address) => {
+      if (address) setName(address);
+      setLoadingAddress(false);
+    });
+  }, [latLng.lat, latLng.lng]);
 
   function handleSubmit(e: FormEvent) {
     e.preventDefault();
@@ -29,7 +39,7 @@ function AddPlaceModal({ latLng, onConfirm, onCancel }: AddPlaceModalProps) {
           <input
             className={`${styles.input} ${error ? styles.inputError : ''}`}
             type="text"
-            placeholder="장소 이름을 입력하세요"
+            placeholder={loadingAddress ? '주소 불러오는 중...' : '장소 이름을 입력하세요'}
             value={name}
             onChange={(e) => { setName(e.target.value); setError(''); }}
             autoFocus
@@ -38,7 +48,9 @@ function AddPlaceModal({ latLng, onConfirm, onCancel }: AddPlaceModalProps) {
           {error && <span className={styles.error}>{error}</span>}
           <div className={styles.actions}>
             <button type="button" className={styles.cancel} onClick={onCancel}>취소</button>
-            <button type="submit" className={styles.confirm}>추가 (후보)</button>
+            <button type="submit" className={styles.confirm} disabled={loadingAddress}>
+              {loadingAddress ? '로딩 중...' : '추가 (후보)'}
+            </button>
           </div>
         </form>
       </div>

@@ -10,7 +10,6 @@ import { Place, PlaceStatus } from '../types/place';
 import NcpMap from '../components/plan/NcpMap';
 import ShareUrl from '../components/plan/ShareUrl';
 import PlacePanel from '../components/plan/PlacePanel';
-import AddPlaceModal from '../components/plan/AddPlaceModal';
 import { ROUTES } from '../router';
 import styles from './PlanDetailPage.module.css';
 
@@ -18,9 +17,8 @@ import styles from './PlanDetailPage.module.css';
 function PlanDetailContent({ plan }: { plan: PlanResponse }) {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
-  const { setPlaces, addPlace, updatePlaceStatus, updatePlaceMemo, updatePlaceOrder, removePlace } = usePlaces();
+  const { setPlaces, addPlace, updatePlaceStatus, updatePlaceMemo, updatePlaceOrder, removePlace, confirmedPlaces } = usePlaces();
 
-  const [pendingLatLng, setPendingLatLng] = useState<LatLng | null>(null);
   const token = localStorage.getItem('accessToken');
 
   // ── 초기 장소 목록 로드 ──────────────────────────────
@@ -56,23 +54,15 @@ function PlanDetailContent({ plan }: { plan: PlanResponse }) {
 
   usePlanWebSocket({ planId: plan.planId, token, onMessage });
 
-  // ── 지도 클릭 → 장소 추가 모달 ──────────────────────
-  const handleMapClick = useCallback((latLng: LatLng) => {
-    setPendingLatLng(latLng);
-  }, []);
-
-  async function handleAddPlace(name: string) {
-    if (!pendingLatLng) return;
+  // ── 지도/POI 클릭 → 바로 장소 추가 (후보/확정 선택) ──────
+  async function handlePoiAdd(name: string, latLng: LatLng, status: PlaceStatus) {
     const { data } = await placeApi.addPlace(plan.planId, {
       name,
-      latitude: pendingLatLng.lat,
-      longitude: pendingLatLng.lng,
-      status: 'CANDIDATE',
+      latitude: latLng.lat,
+      longitude: latLng.lng,
+      status,
     });
-    // API 응답으로 자기 자신의 화면 즉시 반영
-    // 다른 사용자는 WebSocket 브로드캐스트로 반영됨
     addPlace(data.data);
-    setPendingLatLng(null);
   }
 
   // ── 상태 변경 ────────────────────────────────────────
@@ -85,6 +75,27 @@ function PlanDetailContent({ plan }: { plan: PlanResponse }) {
   async function handleMemoChange(placeId: number, memo: string) {
     const { data } = await placeApi.updateMemo(plan.planId, placeId, memo);
     updatePlaceMemo(data.data.id, data.data.memo ?? '');
+  }
+
+  // ── 순서 변경 ────────────────────────────────────────
+  async function handleReorder(placeId: number, direction: 'up' | 'down') {
+    const sorted = [...confirmedPlaces].sort((a, b) => a.placeOrder - b.placeOrder);
+    const idx = sorted.findIndex((p) => p.id === placeId);
+    if (idx < 0) return;
+
+    const swapIdx = direction === 'up' ? idx - 1 : idx + 1;
+    if (swapIdx < 0 || swapIdx >= sorted.length) return;
+
+    const current = sorted[idx];
+    const target = sorted[swapIdx];
+
+    // 두 장소의 order를 교환
+    await Promise.all([
+      placeApi.updateOrder(plan.planId, current.id, target.placeOrder),
+      placeApi.updateOrder(plan.planId, target.id, current.placeOrder),
+    ]);
+    updatePlaceOrder(current.id, target.placeOrder);
+    updatePlaceOrder(target.id, current.placeOrder);
   }
 
   // ── 장소 삭제 ────────────────────────────────────────
@@ -117,7 +128,7 @@ function PlanDetailContent({ plan }: { plan: PlanResponse }) {
 
       <div className={styles.workspace}>
         <section className={styles.mapSection}>
-          <NcpMap onMapClick={handleMapClick} />
+          <NcpMap onPoiAdd={handlePoiAdd} />
         </section>
 
         <aside className={styles.sidePanel}>
@@ -135,18 +146,12 @@ function PlanDetailContent({ plan }: { plan: PlanResponse }) {
               onStatusChange={handleStatusChange}
               onMemoChange={handleMemoChange}
               onDelete={handleDelete}
+              onReorder={handleReorder}
             />
           </div>
         </aside>
       </div>
 
-      {pendingLatLng && (
-        <AddPlaceModal
-          latLng={pendingLatLng}
-          onConfirm={handleAddPlace}
-          onCancel={() => setPendingLatLng(null)}
-        />
-      )}
     </div>
   );
 }

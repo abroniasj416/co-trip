@@ -11,9 +11,15 @@ export interface LatLng {
   lng: number;
 }
 
+export interface PoiClickInfo {
+  name: string;
+  latLng: LatLng;
+}
+
 export function useNcpMap(
   containerId: string,
-  onMapClick?: (latLng: LatLng) => void
+  onMapClick?: (latLng: LatLng) => void,
+  onPoiClick?: (poi: PoiClickInfo) => void,
 ) {
   const [status, setStatus] = useState<MapStatus>('idle');
   const mapRef = useRef<naver.maps.Map | null>(null);
@@ -55,7 +61,7 @@ export function useNcpMap(
 
   // 클릭 이벤트 등록/해제
   useEffect(() => {
-    if (status !== 'ready' || !mapRef.current || !onMapClick) return;
+    if (status !== 'ready' || !mapRef.current) return;
 
     if (clickListenerRef.current) {
       naver.maps.Event.removeListener(clickListenerRef.current);
@@ -65,8 +71,21 @@ export function useNcpMap(
       mapRef.current,
       'click',
       (e: unknown) => {
-        const event = e as { coord: naver.maps.LatLng };
-        onMapClick({ lat: event.coord.lat(), lng: event.coord.lng() });
+        const event = e as {
+          coord: naver.maps.LatLng;
+          poiName?: string;
+          poiElement?: unknown;
+        };
+
+        const latLng: LatLng = { lat: event.coord.lat(), lng: event.coord.lng() };
+        const name = event.poiName || '';
+
+        // 모든 클릭을 onPoiClick으로 처리 (poiName이 있으면 POI, 없으면 일반 위치)
+        if (onPoiClick) {
+          onPoiClick({ name, latLng });
+        } else if (onMapClick) {
+          onMapClick(latLng);
+        }
       }
     );
 
@@ -75,7 +94,7 @@ export function useNcpMap(
         naver.maps.Event.removeListener(clickListenerRef.current);
       }
     };
-  }, [status, onMapClick]);
+  }, [status, onMapClick, onPoiClick]);
 
   return { status, mapRef };
 }

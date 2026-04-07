@@ -1,22 +1,29 @@
-import { useEffect, useRef } from 'react';
-import { useNcpMap, LatLng } from '../../hooks/useNcpMap';
+import { useEffect, useRef, useState, useCallback } from 'react';
+import { useNcpMap, LatLng, PoiClickInfo } from '../../hooks/useNcpMap';
 import { usePlaces } from '../../context/PlaceContext';
 import { PlaceMarkerManager } from './PlaceMarker';
 import { RoutePolylineManager } from './RoutePolyline';
+import { PlaceStatus } from '../../types/place';
+import PlaceInfoPanel from './PlaceInfoPanel';
 import styles from './NcpMap.module.css';
 
 const MAP_CONTAINER_ID = 'ncp-map-container';
 
 interface NcpMapProps {
-  onMapClick: (latLng: LatLng) => void;
+  onPoiAdd: (name: string, latLng: LatLng, status: PlaceStatus) => void;
 }
 
-function NcpMap({ onMapClick }: NcpMapProps) {
+function NcpMap({ onPoiAdd }: NcpMapProps) {
   const { places, confirmedPlaces, selectedPlaceId, selectPlace } = usePlaces();
   const markerManagerRef = useRef<PlaceMarkerManager | null>(null);
   const routeManagerRef = useRef<RoutePolylineManager | null>(null);
+  const [activePoi, setActivePoi] = useState<PoiClickInfo | null>(null);
 
-  const { status, mapRef } = useNcpMap(MAP_CONTAINER_ID, onMapClick);
+  const handlePoiClick = useCallback((poi: PoiClickInfo) => {
+    setActivePoi(poi);
+  }, []);
+
+  const { status, mapRef } = useNcpMap(MAP_CONTAINER_ID, undefined, handlePoiClick);
 
   // 지도 준비 시 매니저 초기화
   useEffect(() => {
@@ -29,19 +36,34 @@ function NcpMap({ onMapClick }: NcpMapProps) {
     }
   }, [status, mapRef]);
 
-  // 장소 목록 변경 시 마커 동기화
+  // 장소 목록 변경 시 마커 동기화 (확정 순서 번호 전달)
   useEffect(() => {
     if (!markerManagerRef.current) return;
+    const confirmedOrder = new Map<number, number>();
+    confirmedPlaces.forEach((p, i) => confirmedOrder.set(p.id, i + 1));
+
     markerManagerRef.current.sync(places, selectedPlaceId, (place) => {
       selectPlace(place.id);
-    });
-  }, [places, selectedPlaceId, selectPlace]);
+    }, confirmedOrder);
+  }, [places, selectedPlaceId, selectPlace, confirmedPlaces]);
 
-  // 확정 장소 변경 시 경로 다시 그리기
+  // 확정 장소 변경 시 구간별 경로 업데이트
   useEffect(() => {
-    if (!routeManagerRef.current) return;
-    routeManagerRef.current.draw(confirmedPlaces);
+    const manager = routeManagerRef.current;
+    if (!manager) return;
+
+    if (confirmedPlaces.length < 2) {
+      manager.clear();
+      return;
+    }
+
+    manager.update(confirmedPlaces);
   }, [confirmedPlaces]);
+
+  function handlePoiAdd(name: string, latLng: LatLng, placeStatus: PlaceStatus) {
+    onPoiAdd(name, latLng, placeStatus);
+    setActivePoi(null);
+  }
 
   return (
     <div className={styles.wrapper}>
@@ -60,11 +82,20 @@ function NcpMap({ onMapClick }: NcpMapProps) {
           <p className={styles.overlayText}>지도 로딩 중...</p>
         </div>
       )}
+
       <div
         id={MAP_CONTAINER_ID}
         className={styles.mapContainer}
         style={{ visibility: status === 'ready' ? 'visible' : 'hidden' }}
       />
+
+      {activePoi && (
+        <PlaceInfoPanel
+          poi={activePoi}
+          onAdd={handlePoiAdd}
+          onClose={() => setActivePoi(null)}
+        />
+      )}
     </div>
   );
 }

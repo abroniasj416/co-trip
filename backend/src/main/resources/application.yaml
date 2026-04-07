@@ -31,3 +31,11 @@ server:
 jwt:
   secret: Y29Db3RyaXAtc2VjcmV0LWtleS1mb3ItaG1hYy1zaGEyNTYtYWxnb3JpdGht
   expiration-ms: 1800000   # 30분
+
+ncp:
+  client-id: ${NCP_CLIENT_ID:p21qq8jesg}
+  client-secret: ${NCP_CLIENT_SECRET:ffzC9EkAuh1wg5f76kVfsotRn7fdcw1wx8xV3Kpb}
+
+naver-search:
+  client-id: ${NAVER_SEARCH_CLIENT_ID:dZ2_xTXpxypW88BaUSVp}
+  client-secret: ${NAVER_SEARCH_CLIENT_SECRET:I_c8HeWemj}

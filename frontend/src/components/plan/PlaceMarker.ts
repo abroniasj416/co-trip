@@ -21,8 +21,14 @@ export class PlaceMarkerManager {
   /**
    * 장소 목록 전체를 지도에 동기화
    * 없어진 마커는 제거, 새 마커는 추가, 상태 변경된 마커는 아이콘 갱신
+   * confirmedOrder: 확정 장소의 id → 확정 순서 번호 (1-based)
    */
-  sync(places: Place[], selectedId: number | null, onClick: (place: Place) => void) {
+  sync(
+    places: Place[],
+    selectedId: number | null,
+    onClick: (place: Place) => void,
+    confirmedOrder: Map<number, number> = new Map(),
+  ) {
     const currentIds = new Set(places.map((p) => p.id));
 
     // 제거된 장소 마커 삭제
@@ -36,7 +42,8 @@ export class PlaceMarkerManager {
     // 추가/갱신
     places.forEach((place) => {
       const isSelected = place.id === selectedId;
-      const icon = this.buildIcon(place, isSelected);
+      const orderNum = confirmedOrder.get(place.id) ?? null;
+      const icon = this.buildIcon(place, isSelected, orderNum);
 
       if (this.markers.has(place.id)) {
         this.markers.get(place.id)!.setIcon(icon);
@@ -62,10 +69,10 @@ export class PlaceMarkerManager {
     this.markers.clear();
   }
 
-  private buildIcon(place: Place, isSelected: boolean) {
+  private buildIcon(place: Place, isSelected: boolean, orderNum: number | null) {
     const color = isSelected ? COLORS.SELECTED : COLORS[place.status];
     const size = isSelected ? 36 : 30;
-    const order = place.status === 'CONFIRMED' ? `<text x="12" y="16" font-size="10" fill="white" text-anchor="middle" font-weight="bold">${place.placeOrder + 1}</text>` : '';
+    const order = orderNum != null ? `<text x="12" y="16" font-size="10" fill="white" text-anchor="middle" font-weight="bold">${orderNum}</text>` : '';
 
     const svg = `
       <svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size + 8}" viewBox="0 0 24 32">
