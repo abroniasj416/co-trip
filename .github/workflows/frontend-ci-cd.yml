@@ -89,6 +89,4 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
           build-args: |
-            VITE_API_BASE_URL=${{ github.ref == 'refs/heads/main' && '' || '' }}
-            VITE_WS_BASE_URL=${{ github.ref == 'refs/heads/main' && '' || '' }}
-            VITE_NCP_MAP_CLIENT_ID=${{ secrets.NCP_MAP_CLIENT_ID }}
+            VITE_NCP_MAP_CLIENT_ID=${{ secrets.NCP_MAP_CLIENT_ID || 'p21qq8jesg' }}
