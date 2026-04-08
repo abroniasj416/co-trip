@@ -1,0 +1,71 @@
+# =============================================
+# Dev 환경: 로컬 개발 전체 스택
+# 사용법: docker compose -f docker-compose.dev.yml up -d
+# =============================================
+services:
+  # ── 로컬 DB (개발용) ──
+  postgres:
+    image: postgres:16
+    container_name: cotrip-postgres
+    environment:
+      POSTGRES_DB: cotrip
+      POSTGRES_USER: cotrip
+      POSTGRES_PASSWORD: cotrip1234
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U cotrip"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7
+    container_name: cotrip-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ── Backend (dev) ──
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: cotrip-backend-dev
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+      # dev에서는 docker 네트워크 내부 호스트명 사용
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/cotrip
+      SPRING_DATASOURCE_USERNAME: cotrip
+      SPRING_DATASOURCE_PASSWORD: cotrip1234
+      SPRING_DATA_REDIS_HOST: redis
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  # ── Frontend (dev) ──
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: cotrip-frontend-dev
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+
+volumes:
+  postgres-data:
+  redis-data:

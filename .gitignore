@@ -40,9 +40,15 @@ out/
 PROJECT_GUIDE.md
 AGENTS.md
 
-### ENV (추천)
+### ENV
 .env
+.env.prod
+.env.local
 backend/.env
+backend/.env.prod
+
+### Deploy (NCP에 직접 복붙 — git에 올리지 않음)
+deploy/
 
 ### Frontend ###
 frontend/node_modules/

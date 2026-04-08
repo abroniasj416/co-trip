@@ -1,0 +1,41 @@
+# =============================================
+# Prod 환경: NCP 배포용
+# DB/Redis는 NCP Cloud DB 사용 → 컨테이너 없음
+# 사용법: docker compose -f docker-compose.prod.yml --env-file .env.prod up -d
+# =============================================
+services:
+  backend:
+    image: ghcr.io/${GHCR_OWNER}/co-trip-backend:latest
+    container_name: cotrip-backend
+    restart: always
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      DB_URL: ${DB_URL}
+      DB_USERNAME: ${DB_USERNAME}
+      DB_PASSWORD: ${DB_PASSWORD}
+      REDIS_HOST: ${REDIS_HOST}
+      REDIS_PORT: ${REDIS_PORT}
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+      JWT_SECRET: ${JWT_SECRET}
+      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS}
+      NCP_CLIENT_ID: ${NCP_CLIENT_ID}
+      NCP_CLIENT_SECRET: ${NCP_CLIENT_SECRET}
+      NAVER_SEARCH_CLIENT_ID: ${NAVER_SEARCH_CLIENT_ID}
+      NAVER_SEARCH_CLIENT_SECRET: ${NAVER_SEARCH_CLIENT_SECRET}
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8080/actuator/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  frontend:
+    image: ghcr.io/${GHCR_OWNER}/co-trip-frontend:latest
+    container_name: cotrip-frontend
+    restart: always
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
