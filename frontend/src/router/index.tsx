@@ -1,4 +1,4 @@
-import { createBrowserRouter, Navigate } from 'react-router-dom';
+import { createBrowserRouter, Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import LandingPage from '../pages/LandingPage';
 import LoginPage from '../pages/LoginPage';
@@ -16,7 +16,8 @@ export const ROUTES = {
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { isAuthenticated } = useAuth();
-  return isAuthenticated ? <>{children}</> : <Navigate to={ROUTES.LOGIN} replace />;
+  const location = useLocation();
+  return isAuthenticated ? <>{children}</> : <Navigate to={ROUTES.LOGIN} state={{ from: location.pathname }} replace />;
 }
 
 function GuestOnlyRoute({ children }: { children: React.ReactNode }) {

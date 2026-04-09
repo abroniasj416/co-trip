@@ -1,5 +1,5 @@
 import { FormEvent, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import AuthLayout from '../components/auth/AuthLayout';
 import FormInput from '../components/common/FormInput';
 import Button from '../components/common/Button';
@@ -14,7 +14,9 @@ interface FormErrors {
 
 function LoginPage() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { login } = useAuth();
+  const redirectTo = (location.state as { from?: string })?.from || ROUTES.PLANS;
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -39,7 +41,7 @@ function LoginPage() {
     setLoading(true);
     try {
       await login({ email, password });
-      navigate(ROUTES.PLANS);
+      navigate(redirectTo);
     } catch (err: unknown) {
       const message =
         (err as { response?: { data?: { message?: string } } })?.response?.data?.message ??
